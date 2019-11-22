@@ -519,6 +519,9 @@ export class MyworkbookComponent {
     this.canvas.isDrawingMode = true;
     this.canvas.freeDrawingBrush.color = this.color;
     this.canvas.freeDrawingBrush.width = this.brushWidth;
+    this.canvas.freeDrawingBrush.strokeLineCap = 'round';
+    this.canvas.freeDrawingBrush.strokeLineJoin = 'round';
+    this.canvas.freeDrawingBrush.decimate = 5;
     this.canvas.on('path:created', (opt) => {
       opt.path.globalCompositeOperation = null;
     });
