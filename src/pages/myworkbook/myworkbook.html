@@ -140,9 +140,12 @@
         <ion-item class="tool_item" (click)="extendPage(currentPage, 'new')">
           <ion-icon  class="tool_icon" name="arrow-dropdown"></ion-icon>
         </ion-item>
-        <ion-item class="tool_item" (click)="removeExtendPage()">
+        <!-- <ion-item class="tool_item" (click)="removeExtendPage()">
             <ion-icon  class="tool_icon" name="arrow-dropup"></ion-icon>
-          </ion-item>
+        </ion-item> -->
+        <ion-item class="tool_item" (click)="clear()">
+            <ion-icon  class="tool_icon" name="trash"></ion-icon>
+        </ion-item>
         
         <ion-item class="tool_item" (click)="saveData(currentPage)">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">

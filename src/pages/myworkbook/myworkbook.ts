@@ -26,7 +26,7 @@ const PAGE_EXTEND_HEIGHT = 100;
   //changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MyworkbookComponent {
-  bookid:number;
+  workbookid:number;
   courseid:number;
   selectedTab:any;
   pages:Array<any> = [];
@@ -85,16 +85,31 @@ export class MyworkbookComponent {
     platform: Platform,
   ) {
     this.user = 1833;
+    this.workbookid = 11;
+    if (navParams.get('book') !== undefined && !isNaN(navParams.get('book'))) {
+      this.workbookid = navParams.get('book');
+    }
+    if (navParams.get('user') !== undefined && !isNaN(navParams.get('user'))) {
+      this.user = navParams.get('user');
+    }
     //this.user = UserServiceProvider.USER;
     //if (navParams.get('mode') !== undefined) {
       /* this.pages = navParams.get('pages');
       this.mode = navParams.get('mode');
       this.courseid = navParams.get('courseid'); */
-      this.webReq.request('local_app_get_workbook_data',  {workbookid: 11, userid:this.user })
+      this.webReq.request('local_app_get_workbook_data',  {workbookid: this.workbookid, userid:this.user })
       .then(res=>{
         this.pages = res;
         this.canvasInit();
-        //this.cdr.detectChanges();
+        //this.detectChanges();
+
+        setTimeout(() => {
+          let page = 0;
+          if (navParams.get('page') !== undefined && !isNaN(navParams.get('page'))) {
+            page = navParams.get('page')-1;
+          }
+          this.setCanvas(page, res[page]);
+        }, 1000);
       }).catch((error)=>{
         console.log(error)
       });
@@ -131,10 +146,10 @@ export class MyworkbookComponent {
         }
       }
       this.lastscale = ev.scale;
-      this.cdr.detectChanges();
+      this.detectChanges();
     });
 
-    this.tapGesture = new Gesture(this.plateContainer);
+    /* this.tapGesture = new Gesture(this.plateContainer);
 		this.tapGesture.listen();
     this.tapGesture.on('tap', ev => {
       if(this.addText) {
@@ -142,7 +157,7 @@ export class MyworkbookComponent {
         const pointy = ev.srcEvent.offsetY;
         this.write(pointx, pointy);
       }
-    });
+    }); */
     this.onAnimationFrame();
   }
   
@@ -169,6 +184,7 @@ export class MyworkbookComponent {
     }
     this.alreadyInit = true;
     this.canvas = new fabric.Canvas('canvasId', { renderOnAddRemove: false });
+
     this.state = STATE_IDLE;
     this.canvas.isDrawingMode = true;
     fabric.Object.prototype.selectable = false;
@@ -218,16 +234,22 @@ export class MyworkbookComponent {
 
     this.canvas.on({
       'mouse:down': (e) => {
-        this.cdr.detectChanges();
+        if (this.tool == 'erase'|| this.tool == 'pen') this.detectChanges();
+        if(this.addText) this.canvas.isDrawingMode = false;
       },
       'mouse:move': (e) => {
         //this.canvas.renderAll();
       },
       'mouse:up': (e) => {
-        if (this.tool == 'erase' || this.tool == 'pen') this.renderZoom()
+        if (this.tool == 'erase'|| this.tool == 'pen') this.renderZoom();
+        if(this.addText) {
+          const pointx = e.pointer.x;
+          const pointy = e.pointer.y;
+          this.write(pointx, pointy);
+        }
       },
       'mouse:out': (e) => {
-        if (this.tool == 'erase' || this.tool == 'pen') this.cdr.detectChanges();
+        if (this.tool == 'erase'|| this.tool == 'pen') this.detectChanges();
       }
     });
     
@@ -253,22 +275,28 @@ export class MyworkbookComponent {
    
     //this.idletimer = setInterval(() => { 
     //   if(this.cdrDetach) {
-    //  this.cdr.detectChanges();
+    //  this.detectChanges();
     //   }
     //}, 1000);
     this.loading.dismiss();
-    //this.cdr.detectChanges();
+    //this.detectChanges();
   }
 
   setCanvas(index, page) {
+
+    let loading = this.loadingCtrl.create({
+      content: 'Loading...'
+    });
+    //loading.present();
+
     this.resetZoom();
     this.draw();
     this.h = [];
     if(this.currentPage !== undefined && this.objectsarray > 0 ) {
       // this.generateImage();
-      this.pages[this.currentPage].userid = this.user.id;
+      //this.pages[this.currentPage].userid = this.user;
       this.pages[this.currentPage].data = JSON.stringify(this.canvas);
-      //this.saveData(this.currentPage);
+      this.saveData(this.currentPage);
     }
     this.canvas.clear();
     this.objectsarray = 0;
@@ -286,19 +314,25 @@ export class MyworkbookComponent {
     if(this.pages[index].data !== '') {
       this.canvas.loadFromJSON(this.pages[index].data, ()=>{
         this.canvas.renderAll.bind(this.canvas);
-        this.cdr.detectChanges();
+        this.detectChanges();
       });
       this.generateImage();
-      this.cdr.detectChanges();
+      this.detectChanges();
     } else {
       this.canvas.setBackgroundImage(this.pages[index].url, ()=>{
         this.canvas.renderAll.bind(this.canvas);
-        this.cdr.detectChanges();
+        this.detectChanges();
       });
-      this.cdr.detectChanges();
+      this.detectChanges();
     }
     this.canvasImage = page.url;
-    this.cdr.detectChanges();
+    this.detectChanges();
+
+    setTimeout(() => {
+      this.renderZoom();      
+    }, 500);
+
+    loading.dismiss();
   }
 
   async generateImage() {
@@ -308,9 +342,11 @@ export class MyworkbookComponent {
       quality: 1
     });
 
-    const objects = this.canvas.getObjects();
-    this.canvas.remove(...objects);
-    this.canvas.clear();
+    /* const objects = this.canvas.getObjects();
+    this.canvas.remove(objects);
+    this.canvas.clear(); */
+    this.clear();
+    this.objectsarray--;
     await fabric.Image.fromURL(newData, (fabricImage) => {
       // remove the old objects then add the new image
       this.canvas.add(fabricImage);
@@ -330,7 +366,7 @@ export class MyworkbookComponent {
       this.pages[index].extend = JSON.stringify(extendedHeight);
     }
     this.canvas.setDimensions({width:width, height:height});
-    this.cdr.detectChanges();
+    this.detectChanges();
   }
 
   removeExtendPage() {
@@ -344,7 +380,7 @@ export class MyworkbookComponent {
     } else {
       this.pages[this.currentPage].extend = null;
     }
-    this.cdr.detectChanges();
+    this.detectChanges();
   }
 
   pan() {
@@ -352,7 +388,7 @@ export class MyworkbookComponent {
     this.state = STATE_PANNING;
     this.canvas.isDrawingMode = false;
     this.canvas.toggleDragMode(true);
-    this.cdr.detectChanges();
+    this.detectChanges();
   }
 
   onAnimationFrame() {
@@ -463,20 +499,20 @@ export class MyworkbookComponent {
     }
     this.onAnimationFrame();
     this.canvas.renderAll();
-    if (this.tool == 'erase') this.cdr.detectChanges();
+    if (this.tool == 'erase') this.detectChanges();
   }
 
   newPage() {
     this.canvas.backgroundImage = 0;
     this.canvas.backgroundColor="white";
     this.canvas.renderAll();
-    this.cdr.detectChanges();
+    this.detectChanges();
   }
 
   onAddText() {
     this.addText = true;
     this.tool = 'write';
-    this.cdr.detectChanges();
+    this.detectChanges();
   }
 
   write(pointx, pointy) {
@@ -493,10 +529,10 @@ export class MyworkbookComponent {
       objecttype: 'text',
       selectable: true,
     });
-
+    this.text.enterEditing();
     this.canvas.add(this.text);
     this.canvas.renderAll();
-    this.cdr.detectChanges();
+    this.detectChanges();
   }
 
   erase() {
@@ -509,7 +545,7 @@ export class MyworkbookComponent {
     this.canvas.on('path:created', (opt) => {
       opt.path.globalCompositeOperation = 'destination-out';
     });
-    this.cdr.detectChanges();
+    this.detectChanges();
   }
 
   draw() {
@@ -521,23 +557,20 @@ export class MyworkbookComponent {
     this.canvas.freeDrawingBrush.width = this.brushWidth;
     this.canvas.freeDrawingBrush.strokeLineCap = 'round';
     this.canvas.freeDrawingBrush.strokeLineJoin = 'round';
-    this.canvas.freeDrawingBrush.decimate = 5;
+    this.canvas.freeDrawingBrush.decimate = 1;
     this.canvas.on('path:created', (opt) => {
       opt.path.globalCompositeOperation = null;
     });
     this.canvas.contextTop.globalCompositeOperation = 'source-over';
     this.canvas.toggleDragMode(false);
-    this.cdr.detectChanges();
+    this.detectChanges();
   }
 
   renderZoom() {
     this.canvas.setZoom(this.canvas.getZoom());
     this.canvas.setHeight(this.canvas.getHeight());
     this.canvas.setWidth(this.canvas.getWidth());
-    /* setTimeout(() => {
-      this.canvas.renderAll();
-    }, 1); */
-    this.cdr.detectChanges();
+    this.detectChanges();
   }
 
   zoomIn() {
@@ -549,7 +582,7 @@ export class MyworkbookComponent {
       this.canvas.setZoom(this.canvas.getZoom()*SCALE_FACTOR);
       this.canvas.setHeight(this.canvas.getHeight() * SCALE_FACTOR);
       this.canvas.setWidth(this.canvas.getWidth() * SCALE_FACTOR);
-      this.cdr.detectChanges();
+      this.detectChanges();
     }
   }
 
@@ -562,7 +595,7 @@ export class MyworkbookComponent {
       this.canvas.setZoom(this.canvas.getZoom()/SCALE_FACTOR);
       this.canvas.setHeight(this.canvas.getHeight() / SCALE_FACTOR);
       this.canvas.setWidth(this.canvas.getWidth() / SCALE_FACTOR);
-      this.cdr.detectChanges();
+      this.detectChanges();
     }
   }
 
@@ -574,7 +607,7 @@ export class MyworkbookComponent {
     this.canvas.setHeight(this.canvas.getHeight() /this.canvas.getZoom() );
     this.canvas.setWidth(this.canvas.getWidth() / this.canvas.getZoom() );
     this.canvas.setZoom(1);
-    this.cdr.detectChanges();
+    this.detectChanges();
   }
 
   onchangeColor(value) {
@@ -582,7 +615,7 @@ export class MyworkbookComponent {
     this.canvas.toggleDragMode(false);
     this.color = value;
     this.canvas.freeDrawingBrush.color = this.color;
-    this.cdr.detectChanges();
+    this.detectChanges();
   }
 
   lineWidthChange(value) {
@@ -606,16 +639,16 @@ export class MyworkbookComponent {
         break;
     }
     this.canvas.freeDrawingBrush.width = this.brushWidth;
-    this.cdr.detectChanges();
+    this.detectChanges();
   }
 
   toggleBrushSize(){
     this.brushWidthDiv = !this.brushWidthDiv;
-    this.cdr.detectChanges();
+    this.detectChanges();
   }
 
   toggleColor(){
-    this.cdr.detectChanges();
+    this.detectChanges();
   }
 
   // onchangeFontFamily(value) {
@@ -631,7 +664,7 @@ export class MyworkbookComponent {
     if(lastItemIndex >= 0) {
     this.h.push(this.canvas._objects.pop());
     this.canvas.renderAll();
-    this.cdr.detectChanges();
+    this.detectChanges();
     }
   }
 
@@ -640,13 +673,13 @@ export class MyworkbookComponent {
       this.isRedoing = true;
       this.canvas.add(this.h.pop());
         this.canvas.renderAll();
-        this.cdr.detectChanges();
+        this.detectChanges();
     }
   }
 
 
   saveData(index){
-    this.pages[index].userid = this.user.id;
+    //this.pages[index].userid = this.user;
     this.pages[index].data = JSON.stringify(this.canvas);
 
     if (this.onSaving) return;
@@ -654,53 +687,38 @@ export class MyworkbookComponent {
     let loading = this.loadingCtrl.create({
       content: 'Saving your work...'
     });
-    // loading.present();
+    //loading.present();
 
-    if(this.mode === 'workbook') {
       let jdata = {
         id: this.pages[index].id,
-        workbookid: this.pages[index].workbookid,
-        courseid: this.pages[index].courseid,
+        workbookid: this.workbookid,
+        courseid: this.courseid,
         url: this.pages[index].url,
-        userid: this.user.id,
+        userid: this.user,
         data: this.pages[index].data,
         extend: this.pages[index].extend ? this.pages[index].extend : null
       };
       this.webReq.request('local_app_save_user_workbooks', jdata, null, 'post')
-        .then((r)=>{
+      .then((r)=>{
           // AlertServiceProvider.Toast('Saved Changes.', 3000, 'bottom');
           // loading.dismiss();
           this.onSaving = false;
-        }).catch(e=>{
+      }).catch(e=>{
           // loading.dismiss();
           AlertServiceProvider.Toast('Error while saving.', 3000, 'bottom');
           this.onSaving = false;
-        });
-
-    } else {
-      let jdata = JSON.stringify(this.pages);
-      this.webReq.request('local_app_save_note', {id:this.courseid, data: jdata}, null, 'post')
-      .then((r)=>{
-        loading.dismiss();
-        this.onSaving = false;
-      }).catch(e=>{
-        loading.dismiss();
-        this.onSaving = false;
       });
-    }
-
   }
-
 
   addPage(){
     this.pages[this.pages.length] = {data:'', url:''};
-    //this.saveData(this.currentPage);
-    this.cdr.detectChanges();
+    this.saveData(this.currentPage);
+    this.detectChanges();
   }
 
   removePage(id){
     this.pages.splice(id, 1);
-    this.cdr.detectChanges();
+    this.detectChanges();
   }
 
   close(){
@@ -739,15 +757,28 @@ export class MyworkbookComponent {
     })
   }
 
-  ionViewWillLeave(){
+  /* ionViewWillLeave(){
     setTimeout(()=>{
-      //this.saveData(this.currentPage);
+      this.saveData(this.currentPage);
     },0);
-  }
+  } */
 
   ngOnDestroy() {
     clearInterval(this.idletimer);
     clearInterval(this.savetimer);
   }
 
+  clear(){
+    const objects = this.canvas.getObjects();
+    this.canvas.remove(objects);
+    this.canvas.clear();
+    this.objectsarray++;
+  }
+
+  detectChanges(){
+    try {
+      this.cdr.detectChanges();      
+    } catch (error) {
+    }
+  }
 }

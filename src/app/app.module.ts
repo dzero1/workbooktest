@@ -20,7 +20,14 @@ import { HttpClientModule } from '@angular/common/http';
     BrowserModule,
     ColorPickerModule,
     HttpClientModule,
-    IonicModule.forRoot(MyApp)
+    IonicModule.forRoot(MyApp, {}, {
+      links: [
+       { component: MyworkbookComponent, name: 'Workbook', segment: 'workbook' },
+       { component: MyworkbookComponent, name: 'Workbook', segment: 'workbook/:book' },
+       { component: MyworkbookComponent, name: 'Workbook', segment: 'workbook/:book/:page' },
+       { component: MyworkbookComponent, name: 'Workbook', segment: 'workbook/:book/:page/:user' }
+     ]
+   })
   ],
   bootstrap: [IonicApp],
   entryComponents: [

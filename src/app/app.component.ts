@@ -9,10 +9,11 @@ import { Route } from '@angular/compiler/src/core';
   templateUrl: 'app.html'
 })
 export class MyApp {
-  //rootPage:any = MyworkbookComponent;
+  rootPage:any = MyworkbookComponent;
   @ViewChild(Nav) nav: Nav;
 
-  constructor(platform: Platform, 
+  constructor(
+    platform: Platform, 
     statusBar: StatusBar, 
     splashScreen: SplashScreen) {
     platform.ready().then(() => {
@@ -20,6 +21,7 @@ export class MyApp {
       // Here you can do any higher level native things you might need.
       statusBar.styleDefault();
       splashScreen.hide();
+      
       this.nav.setRoot(MyworkbookComponent);
     });
   }
