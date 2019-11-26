@@ -3,13 +3,13 @@ import { Platform, Nav } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 
-import { MyworkbookComponent } from '../pages/myworkbook/myworkbook';
-import { Route } from '@angular/compiler/src/core';
+import { MyworkbookNewPage } from '../pages/myworkbook-new/myworkbook-new';
+
 @Component({
   templateUrl: 'app.html'
 })
 export class MyApp {
-  rootPage:any = MyworkbookComponent;
+  //rootPage:any = MyworkbookNewPage;
   @ViewChild(Nav) nav: Nav;
 
   constructor(
@@ -22,7 +22,7 @@ export class MyApp {
       statusBar.styleDefault();
       splashScreen.hide();
       
-      this.nav.setRoot(MyworkbookComponent);
+      this.nav.setRoot(MyworkbookNewPage);
     });
   }
 }

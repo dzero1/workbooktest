@@ -93,16 +93,16 @@
             <small class="toolitem_subtopic">Size</small>
             <img class="toolitem_subtopic_content" src="assets/imgs/workbok_editortool/circle_{{brushImage}}x.png">
           </span>
-        </div>
-        <div class="brush_width" *ngIf="brushWidthDiv">
-          <div [ngClass]="(brushWidth === 1)? 'brush-margin': 'brush-margin'" (click)="lineWidthChange(1)"><img
-            src="assets/imgs/workbok_editortool/circle_1x.png"></div>
-          <div [ngClass]="(brushWidth === 1)? 'brush-margin': 'brush-margin'" (click)="lineWidthChange(3)"><img
-            src="assets/imgs/workbok_editortool/circle_2x.png"></div>
-          <div [ngClass]="(brushWidth === 1)? 'brush-margin': 'brush-margin'" (click)="lineWidthChange(6)"><img
-            src="assets/imgs/workbok_editortool/circle_3x.png"></div>
-          <div [ngClass]="(brushWidth === 1)? 'brush-margin': 'brush-margin'" (click)="lineWidthChange(10)"><img
-            src="assets/imgs/workbok_editortool/circle_4x.png"></div>
+          <div class="brush_width" *ngIf="brushWidthDiv">
+            <div [ngClass]="(brushWidth === 1)? 'brush-margin': 'brush-margin'" (click)="lineWidthChange(1)"><img
+              src="assets/imgs/workbok_editortool/circle_1x.png"></div>
+            <div [ngClass]="(brushWidth === 1)? 'brush-margin': 'brush-margin'" (click)="lineWidthChange(3)"><img
+              src="assets/imgs/workbok_editortool/circle_2x.png"></div>
+            <div [ngClass]="(brushWidth === 1)? 'brush-margin': 'brush-margin'" (click)="lineWidthChange(6)"><img
+              src="assets/imgs/workbok_editortool/circle_3x.png"></div>
+            <div [ngClass]="(brushWidth === 1)? 'brush-margin': 'brush-margin'" (click)="lineWidthChange(10)"><img
+              src="assets/imgs/workbok_editortool/circle_4x.png"></div>
+          </div>
         </div>
 
         <div class="tool_item upper-tools" *ngIf="editingMode === 'draw'">
@@ -161,53 +161,5 @@
 
   </ion-row>
 
-
-  <!--<ion-fab right bottom>-->
-  <!--<button ion-fab class="fab-mobile share-btn">-->
-  <!--<ion-icon name="share"></ion-icon>-->
-  <!--</button>-->
-  <!--<ion-fab-list side="left">-->
-  <!--<button ion-fab (click)="share()">-->
-  <!--<ion-icon name="chatbubbles"></ion-icon>-->
-  <!--</button>-->
-  <!--<button ion-fab (click)="share_email()">-->
-  <!--<ion-icon name="mail"></ion-icon>-->
-  <!--</button>-->
-  <!--</ion-fab-list>-->
-  <!--</ion-fab>-->
-
 </ion-content>
 
-
-<!-- <ion-content class="mynote-padding mobile" *ngIf="isMobile" no-bounce>
-
-  <ion-fab top right edge style="top: 0;">
-    <button ion-fab mini class="close-btn" (click)="close()"><ion-icon name="close"></ion-icon></button>
-  </ion-fab>
-
-  <ion-list class="pages" padding>
-    <ion-item class="page" *ngFor="let page of pages; let i = index;" [ngClass]="{'selected': currentPage == i}" (click)="gotoPage(i, page)" [style.backgroundImage]="'url('+page.thumb+')'" >
-      <div right>
-        <button  (click)="removePage(i)">
-          <ion-icon name="trash"></ion-icon>
-        </button>
-      </div>
-    </ion-item>
-
-    <ion-item class="add-page">
-      <button ion-button block large outline (click)="addPage()">
-        <ion-icon  name="add-circle"></ion-icon>
-      </button>
-    </ion-item>
-
-  </ion-list>
-
-  <ion-fab right bottom>
-    <button ion-fab class="fab-mobile share-btn"><ion-icon name="share"></ion-icon></button>
-    <ion-fab-list side="left">
-      <button ion-fab (click)="share()"><ion-icon name="chatbubbles"></ion-icon></button>
-      <button ion-fab (click)="share_email()"><ion-icon name="mail"></ion-icon></button>
-    </ion-fab-list>
-  </ion-fab>
-
-</ion-content> -->

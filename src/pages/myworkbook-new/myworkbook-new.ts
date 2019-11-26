@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { NavController, NavParams, LoadingController, Platform, IonicPage } from 'ionic-angular';
 import { WebRequestProvider } from '../../providers/web-request';
 import { AlertServiceProvider } from '../../providers/alert-service';
@@ -13,19 +13,13 @@ const STATE_PANNING = 'panning';
 
 const PAGE_EXTEND_HEIGHT = 100;
 
-/**
- * Generated class for the PagesMyworkbookComponent component.
- *
- * See https://angular.io/api/core/Component for more info on Angular
- * Components.
- */
-// @IonicPage()
+@IonicPage()
 @Component({
-  selector: 'page-workbook',
-  templateUrl: 'myworkbook.html',
-  //changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'page-myworkbook-new',
+  templateUrl: 'myworkbook-new.html',
 })
-export class MyworkbookComponent {
+export class MyworkbookNewPage {
+
   workbookid:number;
   courseid:number;
   selectedTab:any;
@@ -86,17 +80,26 @@ export class MyworkbookComponent {
   ) {
     this.user = 1833;
     this.workbookid = 11;
-    if (navParams.get('book') !== undefined && !isNaN(navParams.get('book'))) {
+    this.mode = 'workbook';
+    this.courseid = 107;
+    /* if (navParams.get('book') !== undefined && !isNaN(navParams.get('book'))) {
       this.workbookid = navParams.get('book');
     }
     if (navParams.get('user') !== undefined && !isNaN(navParams.get('user'))) {
       this.user = navParams.get('user');
-    }
+    } */
     //this.user = UserServiceProvider.USER;
     //if (navParams.get('mode') !== undefined) {
       /* this.pages = navParams.get('pages');
       this.mode = navParams.get('mode');
       this.courseid = navParams.get('courseid'); */
+      
+    //}
+    
+    platform.ready().then((readySource) => {
+      this.platformHeight = platform.height();
+      this.platformWidth = platform.width();
+
       this.webReq.request('local_app_get_workbook_data',  {workbookid: this.workbookid, userid:this.user })
       .then(res=>{
         this.pages = res;
@@ -105,28 +108,22 @@ export class MyworkbookComponent {
 
         setTimeout(() => {
           let page = 0;
-          if (navParams.get('page') !== undefined && !isNaN(navParams.get('page'))) {
+          /* if (navParams.get('page') !== undefined && !isNaN(navParams.get('page'))) {
             page = navParams.get('page')-1;
-          }
+          } */
           this.setCanvas(page, res[page]);
         }, 1000);
       }).catch((error)=>{
         console.log(error)
       });
-      
-      this.mode = 'workbook';
-      this.courseid = 107;
-    //}
-    
-    platform.ready().then((readySource) => {
-      this.platformHeight = platform.height();
-      this.platformWidth = platform.width();
+
+      this.loading = this.loadingCtrl.create({
+        content: 'Loading...'
+      });
+      this.loading.present();
+
     });
 
-    this.loading = this.loadingCtrl.create({
-      content: 'Loading...'
-    });
-    this.loading.present();
   }
   
   ngOnInit() {
@@ -172,18 +169,17 @@ export class MyworkbookComponent {
       this.pages[i].width = image.naturalWidth;
       this.pages[i].height = image.naturalHeight;
     }
-    if(i == 0) {
+    /* if(i == 0) {
       this.canvasInit();
-    }
+    } */
   }
   
   alreadyInit:boolean = false;
   canvasInit() {
-    if (this.alreadyInit) {
-      return;
-    }
+    if (this.alreadyInit) return;
     this.alreadyInit = true;
-    this.canvas = new fabric.Canvas('canvasId', { renderOnAddRemove: false });
+    this.canvas = new fabric.Canvas('canvasId', { renderOnAddRemove: false, enableRetinaScaling:false });
+    this.canvas.enableRetinaScaling = false;
 
     this.state = STATE_IDLE;
     this.canvas.isDrawingMode = true;
@@ -235,14 +231,20 @@ export class MyworkbookComponent {
     this.canvas.on({
       'mouse:down': (e) => {
         if (this.tool == 'erase'|| this.tool == 'pen') this.detectChanges();
-        if(this.addText) this.canvas.isDrawingMode = false;
+        if (this.addText) this.canvas.isDrawingMode = false;
+        if (e.target && e.target.type === 'i-text') {
+          e.target.enterEditing();
+          //e.target.hiddenTextarea.focus();
+          //fabicText.hiddenTextarea.focus();
+          this.detectChanges();
+        }
       },
       'mouse:move': (e) => {
         //this.canvas.renderAll();
       },
       'mouse:up': (e) => {
         if (this.tool == 'erase'|| this.tool == 'pen') this.renderZoom();
-        if(this.addText) {
+        if (this.addText) {
           const pointx = e.pointer.x;
           const pointy = e.pointer.y;
           this.write(pointx, pointy);
@@ -263,7 +265,9 @@ export class MyworkbookComponent {
         height = this.pages[0].height + ext;
         width = this.pages[0].width;
       }
-      this.canvas.setDimensions({width:width, height:height});
+      //this.canvas.setDimensions({width:width, height:height});
+      this.canvas.setHeight(height);
+      this.canvas.setWidth(width);
       this.canvasImage = this.pages[0].url;
       if(this.pages[0].data !== '') {
         this.canvas.loadFromJSON(this.pages[0].data, this.canvas.renderAll.bind(this.canvas));
@@ -283,6 +287,8 @@ export class MyworkbookComponent {
   }
 
   setCanvas(index, page) {
+
+    if (this.currentPage == index) return;
 
     let loading = this.loadingCtrl.create({
       content: 'Loading...'
@@ -310,7 +316,9 @@ export class MyworkbookComponent {
       height = this.pages[index].height + ext;
       width = this.pages[index].width;
     }
-    this.canvas.setDimensions({width:width, height:height});
+    //this.canvas.setDimensions({width:width, height:height});
+    this.canvas.setHeight(height,);
+    this.canvas.setWidth(width);
     if(this.pages[index].data !== '') {
       this.canvas.loadFromJSON(this.pages[index].data, ()=>{
         this.canvas.renderAll.bind(this.canvas);
@@ -365,7 +373,9 @@ export class MyworkbookComponent {
       height = this.pages[index].height + extendedHeight.height;
       this.pages[index].extend = JSON.stringify(extendedHeight);
     }
-    this.canvas.setDimensions({width:width, height:height});
+    //this.canvas.setDimensions({width:width, height:height});
+    this.canvas.setHeight(height);
+    this.canvas.setWidth(width);
     this.detectChanges();
   }
 
@@ -376,7 +386,9 @@ export class MyworkbookComponent {
       this.pages[this.currentPage].extend = JSON.stringify(extendedHeight);
       let height =  this.pages[this.currentPage].height + extendedHeight.height;
       let width = this.pages[this.currentPage].width;
-      this.canvas.setDimensions({width:width, height:height});
+      //this.canvas.setDimensions({width:width, height:height});
+      this.canvas.setHeight(height);
+      this.canvas.setWidth(width);
     } else {
       this.pages[this.currentPage].extend = null;
     }
@@ -529,7 +541,7 @@ export class MyworkbookComponent {
       objecttype: 'text',
       selectable: true,
     });
-    this.text.enterEditing();
+    //this.text.enterEditing();
     this.canvas.add(this.text);
     this.canvas.renderAll();
     this.detectChanges();
@@ -604,9 +616,9 @@ export class MyworkbookComponent {
     this.state = STATE_PANNING;
     this.canvas.isDrawingMode = false;
     this.canvas.toggleDragMode(true);
+    this.canvas.setZoom(1);
     this.canvas.setHeight(this.canvas.getHeight() /this.canvas.getZoom() );
     this.canvas.setWidth(this.canvas.getWidth() / this.canvas.getZoom() );
-    this.canvas.setZoom(1);
     this.detectChanges();
   }
 
@@ -639,6 +651,7 @@ export class MyworkbookComponent {
         break;
     }
     this.canvas.freeDrawingBrush.width = this.brushWidth;
+    this.toggleBrushSize();
     this.detectChanges();
   }
 
@@ -781,4 +794,5 @@ export class MyworkbookComponent {
     } catch (error) {
     }
   }
+
 }
