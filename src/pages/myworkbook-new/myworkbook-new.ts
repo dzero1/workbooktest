@@ -69,6 +69,8 @@ export class MyworkbookNewPage {
   lastscale;
   objectsarray:number = 0;
 
+  isMobile = false;
+
   constructor(
     public navCtrl: NavController,
     public navParams: NavParams,
@@ -100,6 +102,10 @@ export class MyworkbookNewPage {
       this.platformHeight = platform.height();
       this.platformWidth = platform.width();
 
+      if (platform.is('android') || platform.is('ios')) {
+        this.isMobile = true;
+      }
+
       this.webReq.request('local_app_get_workbook_data',  {workbookid: this.workbookid, userid:this.user })
       .then(res=>{
         this.pages = res;
@@ -112,7 +118,7 @@ export class MyworkbookNewPage {
             page = navParams.get('page')-1;
           } */
           this.setCanvas(page, res[page]);
-        }, 1000);
+        }, 3000);
       }).catch((error)=>{
         console.log(error)
       });
@@ -179,7 +185,6 @@ export class MyworkbookNewPage {
     if (this.alreadyInit) return;
     this.alreadyInit = true;
     this.canvas = new fabric.Canvas('canvasId', { renderOnAddRemove: false, enableRetinaScaling:false });
-    this.canvas.enableRetinaScaling = false;
 
     this.state = STATE_IDLE;
     this.canvas.isDrawingMode = true;
@@ -197,7 +202,7 @@ export class MyworkbookNewPage {
           object.prevEvented = object.evented;
           object.prevSelectable = object.selectable;
           object.evented = false;
-          object.selectable = false;
+          //object.selectable = false;
         });
         // Remove selection ability on the canvas
         this.selection = false;
@@ -206,7 +211,7 @@ export class MyworkbookNewPage {
         // When we exit dragmode, we restore the previous values on all objects
         this.forEachObject(function(object) {
           object.evented = (object.prevEvented !== undefined) ? object.prevEvented : object.evented;
-          object.selectable = (object.prevSelectable !== undefined) ? object.prevSelectable : object.selectable;
+          //object.selectable = (object.prevSelectable !== undefined) ? object.prevSelectable : object.selectable;
         });
         // Restore selection ability on the canvas
         // this.selection = true;
@@ -232,6 +237,7 @@ export class MyworkbookNewPage {
       'mouse:down': (e) => {
         if (this.tool == 'erase'|| this.tool == 'pen') this.detectChanges();
         if (this.addText) this.canvas.isDrawingMode = false;
+        console.log(e);
         if (e.target && e.target.type === 'i-text') {
           e.target.enterEditing();
           //e.target.hiddenTextarea.focus();
@@ -296,7 +302,7 @@ export class MyworkbookNewPage {
     //loading.present();
 
     this.resetZoom();
-    this.draw();
+    //this.draw();
     this.h = [];
     if(this.currentPage !== undefined && this.objectsarray > 0 ) {
       // this.generateImage();
@@ -527,6 +533,8 @@ export class MyworkbookNewPage {
     this.detectChanges();
   }
 
+  tmp_top;
+  on_overlap_editing;
   write(pointx, pointy) {
     this.addText = false;
     this.editingMode = 'write';
@@ -540,11 +548,46 @@ export class MyworkbookNewPage {
       top: pointy,
       objecttype: 'text',
       selectable: true,
+      isEditing: true,
     });
-    //this.text.enterEditing();
+    this.text.on('editing:exited', (e)=>{
+      if (this.isMobile && this.on_overlap_editing){
+        const left = (new WebKitCSSMatrix(window.getComputedStyle(this.plateContainer).transform)).m41;
+        this.plateContainer.style['transform']= 'translate('+left+'px,'+this.tmp_top+'px) translateZ(0)';
+        this.on_overlap_editing = false;
+      }
+    });
+    this.text.on('editing:entered', (e)=>{
+      this.fixKeyboard();
+    });
+    this.text.selectAll()
+    this.text.enterEditing();
+    
+    this.fixKeyboard();
+
     this.canvas.add(this.text);
     this.canvas.renderAll();
     this.detectChanges();
+  }
+
+  fixKeyboard() {
+    setTimeout(() => {
+      if (this.text && this.text.type === 'i-text') {
+        this.text.enterEditing();
+        if (this.text.hiddenTextarea) this.text.hiddenTextarea.focus();
+      }
+    }, 100);
+
+    if (this.isMobile && this.text){
+      const half_height = document.body.clientHeight/2;
+      const left = (new WebKitCSSMatrix(window.getComputedStyle(this.plateContainer).transform)).m41;
+      const top = (new WebKitCSSMatrix(window.getComputedStyle(this.plateContainer).transform)).m42;
+      if (this.text.top > (half_height + top)){
+        this.on_overlap_editing = true;
+        this.tmp_top = top;
+        this.plateContainer.style['transform']= 'translate('+left+'px,'+(top - half_height)+'px) translateZ(0)';
+      }
+    }
   }
 
   erase() {
@@ -567,6 +610,38 @@ export class MyworkbookNewPage {
     this.canvas.isDrawingMode = true;
     this.canvas.freeDrawingBrush.color = this.color;
     this.canvas.freeDrawingBrush.width = this.brushWidth;
+    this.canvas.freeDrawingBrush.strokeLineCap = 'round';
+    this.canvas.freeDrawingBrush.strokeLineJoin = 'round';
+    this.canvas.freeDrawingBrush.decimate = 1;
+    this.canvas.on('path:created', (opt) => {
+      opt.path.globalCompositeOperation = null;
+    });
+    this.canvas.contextTop.globalCompositeOperation = 'source-over';
+    this.canvas.toggleDragMode(false);
+    this.detectChanges();
+  }
+
+  toggle_highlight_color = false;
+  clickOutSide(){
+    this.toggle_highlight_color = false;
+  }
+  highlight_color = "#ffff00";
+  changeHighlightColor(color){
+    this.toggle_highlight_color = false;
+    this.canvas.freeDrawingBrush.color = color + '66';
+    this.detectChanges();
+  }
+  highlight() {
+    setTimeout(() => {
+      this.toggle_highlight_color = true;      
+    }, 1);
+
+    this.tool = 'highlight';
+    this.editingMode = 'draw';
+    this.state = STATE_IDLE;
+    this.canvas.isDrawingMode = true;
+    this.canvas.freeDrawingBrush.color = this.highlight_color + '66';
+    this.canvas.freeDrawingBrush.width = 20;
     this.canvas.freeDrawingBrush.strokeLineCap = 'round';
     this.canvas.freeDrawingBrush.strokeLineJoin = 'round';
     this.canvas.freeDrawingBrush.decimate = 1;

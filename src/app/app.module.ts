@@ -11,6 +11,7 @@ import { AlertServiceProvider } from '../providers/alert-service';
 import { ColorPickerModule } from 'ngx-color-picker';
 import { HttpClientModule } from '@angular/common/http';
 import { MyworkbookNewPage } from '../pages/myworkbook-new/myworkbook-new';
+import { AngularSvgIconModule } from 'angular-svg-icon';
 
 @NgModule({
   declarations: [
@@ -23,6 +24,7 @@ import { MyworkbookNewPage } from '../pages/myworkbook-new/myworkbook-new';
     ColorPickerModule,
     HttpClientModule,
     IonicPageModule,
+    AngularSvgIconModule,
     IonicModule.forRoot(MyApp)
     /* IonicModule.forRoot(MyApp, {}, {
       links: [
