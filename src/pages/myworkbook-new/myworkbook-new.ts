@@ -560,12 +560,19 @@ export class MyworkbookNewPage {
     this.text.on('editing:entered', (e)=>{
       this.fixKeyboard();
     });
-    this.text.selectAll()
-    this.text.enterEditing();
+    // this.text.selectAll()
+    // this.text.enterEditing();
     
-    this.fixKeyboard();
+    // this.fixKeyboard();
 
     this.canvas.add(this.text);
+
+    this.canvas.setActiveObject(this.text);
+    this.text.enterEditing();
+    this.text.initHiddenTextarea();
+    this.fixKeyboard();
+    // this.text.hiddenTextarea.focus();
+
     this.canvas.renderAll();
     this.detectChanges();
   }
@@ -625,10 +632,10 @@ export class MyworkbookNewPage {
   clickOutSide(){
     this.toggle_highlight_color = false;
   }
-  highlight_color = "#ffff00";
+  highlight_color = "rgba(255, 255, 0, 0.5)";
   changeHighlightColor(color){
     this.toggle_highlight_color = false;
-    this.canvas.freeDrawingBrush.color = color + '66';
+    this.canvas.freeDrawingBrush.color = color;
     this.detectChanges();
   }
   highlight() {
@@ -640,7 +647,7 @@ export class MyworkbookNewPage {
     this.editingMode = 'draw';
     this.state = STATE_IDLE;
     this.canvas.isDrawingMode = true;
-    this.canvas.freeDrawingBrush.color = this.highlight_color + '66';
+    this.canvas.freeDrawingBrush.color = this.highlight_color;
     this.canvas.freeDrawingBrush.width = 20;
     this.canvas.freeDrawingBrush.strokeLineCap = 'round';
     this.canvas.freeDrawingBrush.strokeLineJoin = 'round';
