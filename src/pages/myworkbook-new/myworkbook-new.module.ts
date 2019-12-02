@@ -4,7 +4,7 @@ import { MyworkbookNewPage } from './myworkbook-new';
 
 @NgModule({
   declarations: [
-    MyworkbookNewPage,
+    // MyworkbookNewPage,
   ],
   imports: [
     IonicPageModule.forChild(MyworkbookNewPage),
