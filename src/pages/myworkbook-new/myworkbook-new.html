@@ -76,7 +76,7 @@
               <ion-item class="tool_item" [ngClass]="{'selected_tool_item': tool === 'highlight'}" (click)="highlight()">
                 <svg-icon src="assets/icon/hilighter.svg"></svg-icon>
               </ion-item>
-              <div class="highlight_color" *ngIf="toggle_highlight_color == true">
+              <div class="highlight_color" *ngIf="toggle_highlight_color">
                 <div class="colors" style="background-color: rgba(3, 255, 0, 1);" (click)="changeHighlightColor('rgba(3, 255, 0, 0.5)')"></div>
                 <div class="colors" style="background-color: rgba(255, 0, 188, 1);" (click)="changeHighlightColor('rgba(255, 0, 188, 0.5)')"></div>
                 <div class="colors" style="background-color: rgba(255, 255, 0, 1);" (click)="changeHighlightColor('rgba(255, 255, 0, 0.5)')"></div>
@@ -114,13 +114,13 @@
               </span>
 
               <div class="brush_width" *ngIf="brushWidthDiv">
-                <div [ngClass]="(brushWidth === 1)? 'brush-margin': 'brush-margin'" (click)="lineWidthChange(1)"><img
+                <div [ngClass]="(brushWidth === 1)? 'brush-margin': 'brush-margin'" (click)="lineWidthChange(2)"><img
                   src="assets/imgs/workbok_editortool/circle_1x.png"></div>
                 <div [ngClass]="(brushWidth === 1)? 'brush-margin': 'brush-margin'" (click)="lineWidthChange(3)"><img
                   src="assets/imgs/workbok_editortool/circle_2x.png"></div>
-                <div [ngClass]="(brushWidth === 1)? 'brush-margin': 'brush-margin'" (click)="lineWidthChange(6)"><img
+                <div [ngClass]="(brushWidth === 1)? 'brush-margin': 'brush-margin'" (click)="lineWidthChange(4)"><img
                   src="assets/imgs/workbok_editortool/circle_3x.png"></div>
-                <div [ngClass]="(brushWidth === 1)? 'brush-margin': 'brush-margin'" (click)="lineWidthChange(10)"><img
+                <div [ngClass]="(brushWidth === 1)? 'brush-margin': 'brush-margin'" (click)="lineWidthChange(5)"><img
                   src="assets/imgs/workbok_editortool/circle_4x.png"></div>
               </div>
             </div>

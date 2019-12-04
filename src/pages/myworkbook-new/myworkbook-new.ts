@@ -36,9 +36,10 @@ export class MyworkbookNewPage {
   h:Array<any> =[];
   isRedoing = false;
   color = '#000000';
-  brushWidth = 1;
+  brushWidth = 2;
   brushImage = 1;
   brushWidthDiv = false;
+  toggle_highlight_color = false;
   EditedPagesArray:Array<any> = [];
   editingMode = 'draw';
   selectedObject:any;
@@ -406,6 +407,8 @@ export class MyworkbookNewPage {
     this.state = STATE_PANNING;
     this.canvas.isDrawingMode = false;
     this.canvas.toggleDragMode(true);
+    this.brushWidthDiv = false;
+    this.toggle_highlight_color = false;
     this.detectChanges();
   }
 
@@ -541,6 +544,8 @@ export class MyworkbookNewPage {
     this.state = STATE_IDLE;
     this.objectsarray += 1;
     this.canvas.toggleDragMode(false);
+    this.brushWidthDiv = false;
+    this.toggle_highlight_color = false;
     this.canvas.isDrawingMode = false;
     this.text = new fabric.IText('New Text', {
       fontFamily: 'Arial',
@@ -602,6 +607,8 @@ export class MyworkbookNewPage {
     this.state = STATE_IDLE;
     this.canvas.isDrawingMode = true;
     this.canvas.toggleDragMode(false);
+    this.brushWidthDiv = false;
+    this.toggle_highlight_color = false;
     this.canvas.freeDrawingBrush.color =  'rgba(255,255,255,1)';  //this.color; //
     this.canvas.freeDrawingBrush.width = 25;
     this.canvas.on('path:created', (opt) => {
@@ -619,29 +626,29 @@ export class MyworkbookNewPage {
     this.canvas.freeDrawingBrush.width = this.brushWidth;
     this.canvas.freeDrawingBrush.strokeLineCap = 'round';
     this.canvas.freeDrawingBrush.strokeLineJoin = 'round';
-    this.canvas.freeDrawingBrush.decimate = 1;
+    this.canvas.freeDrawingBrush.decimate = 2;
     this.canvas.on('path:created', (opt) => {
       opt.path.globalCompositeOperation = null;
     });
     this.canvas.contextTop.globalCompositeOperation = 'source-over';
     this.canvas.toggleDragMode(false);
+    this.brushWidthDiv = false;
+    this.toggle_highlight_color = false;
     this.detectChanges();
   }
 
-  toggle_highlight_color = false;
   clickOutSide(){
-    this.toggle_highlight_color = false;
+    // this.toggle_highlight_color = false;
   }
   highlight_color = "rgba(255, 255, 0, 0.5)";
   changeHighlightColor(color){
     this.toggle_highlight_color = false;
+    this.canvas.freeDrawingBrush.width = 20;
     this.canvas.freeDrawingBrush.color = color;
     this.detectChanges();
   }
   highlight() {
-    setTimeout(() => {
-      this.toggle_highlight_color = true;      
-    }, 1);
+    console.log(`before toggle_highlight_color: ${this.toggle_highlight_color}`);
 
     this.tool = 'highlight';
     this.editingMode = 'draw';
@@ -657,7 +664,13 @@ export class MyworkbookNewPage {
     });
     this.canvas.contextTop.globalCompositeOperation = 'source-over';
     this.canvas.toggleDragMode(false);
+    this.brushWidthDiv = false;
+    this.toggle_highlight_color = true;
+
+    console.log(`after toggle_highlight_color: ${this.toggle_highlight_color}`);
     this.detectChanges();
+    // setTimeout(() => {     
+    // }, 0);
   }
 
   renderZoom() {
@@ -672,6 +685,8 @@ export class MyworkbookNewPage {
     this.state = STATE_PANNING;
     this.canvas.isDrawingMode = false;
     this.canvas.toggleDragMode(true);
+    this.brushWidthDiv = false;
+    this.toggle_highlight_color = false;
     if(this.canvas.getWidth() * SCALE_FACTOR < 4000) {
       this.canvas.setZoom(this.canvas.getZoom()*SCALE_FACTOR);
       this.canvas.setHeight(this.canvas.getHeight() * SCALE_FACTOR);
@@ -685,6 +700,8 @@ export class MyworkbookNewPage {
     this.state = STATE_PANNING;
     this.canvas.isDrawingMode = false;
     this.canvas.toggleDragMode(true);
+    this.brushWidthDiv = false;
+    this.toggle_highlight_color = false;
     if(this.canvas.getHeight() * SCALE_FACTOR > 500) {
       this.canvas.setZoom(this.canvas.getZoom()/SCALE_FACTOR);
       this.canvas.setHeight(this.canvas.getHeight() / SCALE_FACTOR);
@@ -698,6 +715,8 @@ export class MyworkbookNewPage {
     this.state = STATE_PANNING;
     this.canvas.isDrawingMode = false;
     this.canvas.toggleDragMode(true);
+    this.brushWidthDiv = false;
+    this.toggle_highlight_color = false;
     this.canvas.setZoom(1);
     this.canvas.setHeight(this.canvas.getHeight() /this.canvas.getZoom() );
     this.canvas.setWidth(this.canvas.getWidth() / this.canvas.getZoom() );
@@ -721,10 +740,10 @@ export class MyworkbookNewPage {
       case 3:
         this.brushImage = 2;
         break;
-      case 6:
+      case 4:
         this.brushImage = 3;
         break;
-      case 10:
+      case 5:
         this.brushImage = 4;
         break;
     
@@ -738,6 +757,7 @@ export class MyworkbookNewPage {
   }
 
   toggleBrushSize(){
+    this.toggle_highlight_color = false;
     this.brushWidthDiv = !this.brushWidthDiv;
     this.detectChanges();
   }
@@ -761,9 +781,13 @@ export class MyworkbookNewPage {
     this.canvas.renderAll();
     this.detectChanges();
     }
+    this.brushWidthDiv = false;
+    this.toggle_highlight_color = false;
   }
 
   redo(){
+    this.brushWidthDiv = false;
+    this.toggle_highlight_color = false;
     if(this.h.length>0){
       this.isRedoing = true;
       this.canvas.add(this.h.pop());
@@ -868,6 +892,8 @@ export class MyworkbookNewPage {
     this.canvas.remove(objects);
     this.canvas.clear();
     this.objectsarray++;
+    this.brushWidthDiv = false;
+    this.toggle_highlight_color = false;
   }
 
   detectChanges(){
