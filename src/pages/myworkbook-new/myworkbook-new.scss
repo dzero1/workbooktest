@@ -495,3 +495,14 @@
   }
 }
 
+@media screen and (max-width: 1200px) {
+
+  .mynote-padding {
+    .thumbnails_overlap {
+      width: 140px;
+      min-width: 140px;
+    }
+  }
+
+}
+
