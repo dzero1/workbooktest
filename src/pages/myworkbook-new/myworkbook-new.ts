@@ -1,7 +1,7 @@
 import { Component, ChangeDetectorRef } from '@angular/core';
 import { NavController, NavParams, LoadingController, Platform, IonicPage } from 'ionic-angular';
 import { WebRequestProvider } from '../../providers/web-request';
-import { AlertServiceProvider } from '../../providers/alert-service';
+import { AlertServiceProvider, AlertIcons, AlertButtons } from '../../providers/alert-service';
 //import { UserServiceProvider } from '../../providers/user-service';
 import { Gesture } from 'ionic-angular/gestures/gesture';
 
@@ -78,13 +78,20 @@ export class MyworkbookNewPage {
     private cdr: ChangeDetectorRef,
     public loadingCtrl: LoadingController,
     public webReq: WebRequestProvider,
+    public AlertServiceProvider: AlertServiceProvider,
     //private userService: UserServiceProvider,
     platform: Platform,
   ) {
     this.user = 1833;
-    this.workbookid = 11;
+    this.workbookid = 1;
     this.mode = 'workbook';
     this.courseid = 107;
+
+    // this.user = 275;
+    // this.workbookid = 58;
+    // this.mode = 'workbook';
+    // this.courseid = 3;
+
     /* if (navParams.get('book') !== undefined && !isNaN(navParams.get('book'))) {
       this.workbookid = navParams.get('book');
     }
@@ -296,6 +303,9 @@ export class MyworkbookNewPage {
   setCanvas(index, page) {
 
     if (this.currentPage == index) return;
+
+    // this.canvas.setBackgroundImage(this.pages[this.currentPage].url, this.canvas.renderAll.bind(this.canvas), {crossOrigin: 'Anonymous'});
+    // let url = this.canvas.toDataURL();
 
     let loading = this.loadingCtrl.create({
       content: 'Loading...'
@@ -594,7 +604,11 @@ export class MyworkbookNewPage {
       const half_height = document.body.clientHeight/2;
       const left = (new WebKitCSSMatrix(window.getComputedStyle(this.plateContainer).transform)).m41;
       const top = (new WebKitCSSMatrix(window.getComputedStyle(this.plateContainer).transform)).m42;
-      if (this.text.top > (half_height + top)){
+      if (top == 0 && this.text.top > (half_height + top)){
+        this.on_overlap_editing = true;
+        this.tmp_top = top;
+        this.plateContainer.style['transform']= 'translate('+left+'px,'+(top - half_height)+'px) translateZ(0)';
+      }else if(top < 0 && this.text.top > (half_height - top)){
         this.on_overlap_editing = true;
         this.tmp_top = top;
         this.plateContainer.style['transform']= 'translate('+left+'px,'+(top - half_height)+'px) translateZ(0)';
@@ -844,36 +858,51 @@ export class MyworkbookNewPage {
     this.navCtrl.pop();
   }
 
-  share_email(){
-    //console.log('share_email');
-    AlertServiceProvider.Prompt('Email :', 'Share via email',
-    [ { name: 'email', placeholder: 'Email', type: 'email', value: 'dummy@gmil.com'
-      //UserServiceProvider.USER.email 
-    } ], 'Send', (ok:any)=>{
-      if (ok){
-        const loader = AlertServiceProvider.Loader("Sending mail ...");
-        setTimeout(() => {
-          this.webReq.request('local_app_save_chat',
-          {
-            message:"Shared via Sketch note.", 
-            courseid:this.courseid, 
-            email:ok.email, 
-            // attachment:btoa(this.lc.getImage().toDataURL())
-          }, null, 'post')
-          .then(res=>{
-            loader.dismiss();
-            if (!res.error){
-              AlertServiceProvider.Toast('Email sent successfully', 3000, 'bottom');
-            } else {
-              AlertServiceProvider.Toast('Error sending email. ' + res.message, 3000,'bottom');
-            }
-          }).catch(()=>{
-            loader.dismiss();
-            AlertServiceProvider.Toast('Error sending email.', 3000, 'bottom');
-          })
-        }, 100);
-      }
-    })
+  share_chat(){
+    this.saveData(this.currentPage);
+    const loader = AlertServiceProvider.Loader("Sending to chat ...");
+
+    setTimeout(() => {
+      this.webReq.request('local_app_save_canvas_image',
+      {
+        imageid: this.pages[this.currentPage].id, 
+        courseid: this.courseid, 
+        attachment: btoa(this.canvas.toDataURL()),
+        width: this.canvas.getWidth(),
+        height: this.canvas.getHeight(),
+      }, null, 'post')
+      .then(res=>{
+        loader.dismiss();
+        if (!res.error){
+          AlertServiceProvider.Toast('Successfully sent to chat', 3000, 'bottom');
+        } else {
+          AlertServiceProvider.Toast('Error sending to chat. ' + res.message, 3000,'bottom');
+        }
+      }).catch(()=>{
+        loader.dismiss();
+        AlertServiceProvider.Toast('Error sending to chat.', 3000, 'bottom');
+      })
+    }, 100);
+
+    // setTimeout(() => {
+    //   this.webReq.request('local_app_save_chat',
+    //   {
+    //     message:"Shared via workbook.", 
+    //     courseid:this.courseid, 
+    //     attachment:btoa(this.canvas.toDataURL())
+    //   }, null, 'post')
+    //   .then(res=>{
+    //     loader.dismiss();
+    //     if (!res.error){
+    //       AlertServiceProvider.Toast('Successfully sent to chat', 3000, 'bottom');
+    //     } else {
+    //       AlertServiceProvider.Toast('Error sending to chat. ' + res.message, 3000,'bottom');
+    //     }
+    //   }).catch(()=>{
+    //     loader.dismiss();
+    //     AlertServiceProvider.Toast('Error sending to chat.', 3000, 'bottom');
+    //   })
+    // }, 100);
   }
 
   /* ionViewWillLeave(){
@@ -885,6 +914,14 @@ export class MyworkbookNewPage {
   ngOnDestroy() {
     clearInterval(this.idletimer);
     clearInterval(this.savetimer);
+  }
+
+  clearAll(){
+    AlertServiceProvider.Alert('Are you sure you want to remove all?', 'Confirm' , AlertIcons.Info , AlertButtons.OKCancel , (ret:any)=>{
+      if(ret == AlertButtons.OK){
+        this.clear();
+      }
+    });
   }
 
   clear(){
