@@ -7,7 +7,7 @@
   border-top: 1px solid #CFD8DC;
   background-color: #373737;
 
-  svg-icon{
+  svg-icon {
     fill: white;
   }
 
@@ -24,8 +24,8 @@
     left: 0;
     z-index: 1000;
     height: 90vh;
-    width: 300px;
-    //background-color: #373737;
+    width: 200px;
+    background-color: #373737;
     overflow: auto;
     min-width: 175px;
     top: 35px;
@@ -109,6 +109,7 @@
         width: 50px;
         text-align: center;
         margin-bottom: 5px;
+        border-top: none;
 
         .toolitem_subtopic_content {
           margin: 0 auto;
@@ -156,9 +157,9 @@
           min-width: 68px;
         }
 
-        &.highlight{
+        &.highlight {
           position: relative;
-          .highlight_color{
+          .highlight_color {
             text-align: center;
             position: absolute;
             left: -65px;
@@ -168,7 +169,7 @@
             padding: 4px;
             margin: 0 auto;
 
-            .colors{
+            .colors {
               border-radius: 20px;
               height: 30px;
               width: 30px;
@@ -178,7 +179,7 @@
         }
       }
 
-      .brush_toggler{
+      .brush_toggler {
         position: relative;
 
         .brush_width {
@@ -218,7 +219,7 @@
         width: 50px;
         text-align: center;
         margin-bottom: 5px;
-        
+
         .tool_icon {
           color: #E20330;
         }
@@ -287,7 +288,7 @@
       border-radius: 1px;
       box-shadow: 0 1px 4px -1px rgba(0, 0, 0, .4);
       display: inline-block;
-      margin: 50px;
+      margin: 50px 70px;
       position: relative;
       vertical-align: middle;
       z-index: 0;
@@ -324,7 +325,7 @@
   }
 
   .close-btn {
-    margin: 8px 20px !important;
+    margin: 8px 10px !important;
     width: 20px !important;
     height: 20px !important;
     line-height: 40px;
@@ -492,5 +493,16 @@
       }
     }
   }
+}
+
+@media screen and (max-width: 1200px) {
+
+  .mynote-padding {
+    .thumbnails_overlap {
+      width: 140px;
+      min-width: 140px;
+    }
+  }
+
 }
 
