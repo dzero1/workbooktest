@@ -24,7 +24,7 @@ export class MyworkbookNewPage {
   courseid:number;
   selectedTab:any;
   pages:Array<any> = [];
-  currentPage:number = 0;
+  currentPage:number = -1;
   pageLoaded:boolean = false;
   onInit:boolean = true;
   onSaving:Boolean = false;
@@ -601,14 +601,10 @@ export class MyworkbookNewPage {
     }, 100);
 
     if (this.isMobile && this.text){
-      const half_height = document.body.clientHeight/2;
+      const half_height = document.body.clientHeight/3;
       const left = (new WebKitCSSMatrix(window.getComputedStyle(this.plateContainer).transform)).m41;
       const top = (new WebKitCSSMatrix(window.getComputedStyle(this.plateContainer).transform)).m42;
-      if (top == 0 && this.text.top > (half_height + top)){
-        this.on_overlap_editing = true;
-        this.tmp_top = top;
-        this.plateContainer.style['transform']= 'translate('+left+'px,'+(top - half_height)+'px) translateZ(0)';
-      }else if(top < 0 && this.text.top > (half_height - top)){
+      if (this.text.top > (half_height - top)){
         this.on_overlap_editing = true;
         this.tmp_top = top;
         this.plateContainer.style['transform']= 'translate('+left+'px,'+(top - half_height)+'px) translateZ(0)';
