@@ -13,7 +13,10 @@ const STATE_PANNING = 'panning';
 
 const PAGE_EXTEND_HEIGHT = 100;
 
-@IonicPage()
+@IonicPage({
+  name: 'workbook',
+  segment: 'wb/:a'
+})
 @Component({
   selector: 'page-myworkbook-new',
   templateUrl: 'myworkbook-new.html',
@@ -82,10 +85,29 @@ export class MyworkbookNewPage {
     //private userService: UserServiceProvider,
     platform: Platform,
   ) {
-    this.user = 1833;
-    this.workbookid = 1;
+
+    this.user = 0;
+    this.workbookid = 0;
     this.mode = 'workbook';
-    this.courseid = 107;
+    this.courseid = 0;
+
+    let param = navParams.get('a');
+
+    try {
+      param = atob(param);
+      param = JSON.parse(param);
+      this.user = param.u;
+      this.workbookid = param.w;
+      this.courseid = param.c;
+      WebRequestProvider.token = param.t;
+      WebRequestProvider.url = param.url;
+    } catch (error) {
+      console.log("no params", error)
+      /* this.user = 1833;
+      this.workbookid = 1;
+      this.mode = 'workbook';
+      this.courseid = 107; */
+    }
 
     // this.user = 275;
     // this.workbookid = 58;

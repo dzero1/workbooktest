@@ -9,6 +9,9 @@ import { Observable } from 'rxjs';
 @Injectable()
 export class WebRequestProvider {
 
+  static token = 'a3862ff04142389f3f9f84613bffd089';
+  static url = "http://52.187.170.78/test2";
+
   constructor(private http: HttpClient){ //, private transfer: FileTransfer, private file: File) {
     //console.log('Hello WebRequestProvider Provider');
   }
@@ -21,13 +24,14 @@ export class WebRequestProvider {
       for (const key in httpHeaders)
         if (httpHeaders.hasOwnProperty(key)) _headers.set(key, httpHeaders[key])
 
-    let url = 'http://52.187.170.78/test2/webservice/rest/server.php';
+    //let url = 'http://52.187.170.78/test2/webservice/rest/server.php';
+    let url = WebRequestProvider.url +'/webservice/rest/server.php';
 
     let urlData:any;
     urlData = Object.assign({}, requestData);
     urlData.moodlewsrestformat = 'json';
     urlData.wsfunction = api;
-    urlData.wstoken = 'a3862ff04142389f3f9f84613bffd089';
+    urlData.wstoken = WebRequestProvider.token; //'a3862ff04142389f3f9f84613bffd089';
 
     //console.log(`WEB REQ - ${api}`);
 

@@ -21,8 +21,10 @@ export class MyApp {
       // Here you can do any higher level native things you might need.
       statusBar.styleDefault();
       splashScreen.hide();
+
+      let str = location.href.toString().split("?")[1].substr(2);
       
-      this.nav.setRoot(MyworkbookNewPage);
+      this.nav.setRoot(MyworkbookNewPage, { a: str});
     });
   }
 }
