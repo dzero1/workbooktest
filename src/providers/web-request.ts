@@ -191,7 +191,7 @@ export class WebRequestProvider {
   }
 
   getFileURL(cmid, type, httpHeaders:HttpHeaders = null):string{
-    return 'http://52.187.170.78/test2/local/app/pluginfile.php?token='+ 'a3862ff04142389f3f9f84613bffd089'  +
+    return WebRequestProvider.url + '/local/app/pluginfile.php?token='+ WebRequestProvider.token +
         '&cmid='+ cmid +'&type='+type;
   }
 
