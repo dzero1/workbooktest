@@ -51,7 +51,7 @@ export class WebRequestProvider {
           }
         }
 
-        frmdata.append("wstoken", 'a3862ff04142389f3f9f84613bffd089');
+        frmdata.append("wstoken", WebRequestProvider.token);
         frmdata.append("wsfunction", api);
         frmdata.append("moodlewsrestformat", "json");
 
