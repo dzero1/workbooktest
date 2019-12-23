@@ -86,7 +86,8 @@ export class WebRequestProvider {
 
   uploadFilesByFormPost(formData: FormData = null, filepath = '/', filearea = 'draft', itemid:any = 0){
     return new Promise((resolve, reject)=>{
-      const url = 'http://52.187.170.78/test2/webservice/upload.php';
+      //const url = 'http://52.187.170.78/test2/webservice/upload.php';
+      let url = WebRequestProvider.url +'/webservice/rest/server.php';
       /* let urlData:any;
       urlData = Object.assign({}, requestData);
       urlData.wsfunction = api;
@@ -97,7 +98,7 @@ export class WebRequestProvider {
       formData.append('filearea', filearea);
       formData.append('filepath', filepath);
       formData.append('itemid', itemid);
-      formData.append('token', 'a3862ff04142389f3f9f84613bffd089');
+      formData.append('token', WebRequestProvider.token);
 
       let httpOptions = {
         headers: new HttpHeaders({
